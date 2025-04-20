@@ -4,20 +4,22 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <ctype.h>
 
 extern char **environ;
 
 int main(void)
 {
-	char *line = NULL;
+	char *line = NULL, *clean_line = NULL;
 	size_t len = 0;
 	ssize_t nread;
 	pid_t pid;
-	int status;
+	int status = 0, start = 0, end = 0, i = 0;
+
 
 	while (1)
 	{
-		printf("#cisfun$ ");
+		printf("#peladosupremo$ ");
 		fflush(stdout);
 
 		nread = getline(&line, &len, stdin);
@@ -30,10 +32,37 @@ int main(void)
 		if (line[nread - 1] == '\n')
 			line[nread - 1] = '\0';
 
-		if (strcmp(line, "exit") == 0)
-			break;
+		start = 0;
+		end = strlen(line) - 1;
 
-		if (line[0] == '\0')
+		for (i = 0; i < strlen(line); i++)
+		{
+		if (!isspace(line[i]))
+		{
+		start = i;
+		break;
+			}
+		}
+
+		for (i = strlen(line) - 1; i >= 0; i--)
+		{
+		if (!isspace(line[i]))
+		{
+		end = i;
+		break;
+			}
+		}
+
+		line[end + 1] = '\0';
+		clean_line = line + start;
+
+		if (strcmp(clean_line, "exit") == 0)
+		{
+			printf("odalep ed olep omoc etsiuf eT\n");
+			break;
+		}
+
+		if (clean_line[0] == '\0')
 			continue;
 
 		pid = fork();
@@ -45,9 +74,9 @@ int main(void)
 
 		if (pid == 0)
 		{
-			char *argv[] = { line, NULL };
+			char *argv[] = { clean_line, NULL };
 
-			if (execve(line, argv, environ) == -1)
+			if (execve(clean_line, argv, environ) == -1)
 			{
 				fprintf(stderr, "%s: No such file or directory\n", line);
 				exit(EXIT_FAILURE);
@@ -61,5 +90,5 @@ int main(void)
 	}
 
 	free(line);
-	return 0;
+	return (0);
 }
