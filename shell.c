@@ -4,7 +4,14 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <ctype.h>
+
+/**
+ * main - Its the principal function (shell).
+ *
+ *
+ *
+ */
+
 
 extern char **environ;
 
@@ -74,11 +81,11 @@ int main(void)
 
 		if (pid == 0)
 		{
-			
 			char *argv[2];
+
 			argv[0] = clean_line;
 			argv[1] = NULL;
-			
+
 			if (execve(clean_line, argv, environ) == -1)
 			{
 				fprintf(stderr, "%s: No such file or directory\n", line);
