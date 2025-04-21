@@ -30,26 +30,26 @@ int main(void)
 		}
 
 		if (line[nread - 1] == '\n')
-			line[nread - 1] = '\0';
+		line[nread - 1] = '\0';
 
 		start = 0;
 		end = strlen(line) - 1;
 
-		for (i = 0; i < strlen(line); i++)
+		for (i = 0; line[i] != '\0'; i++)
 		{
-		if (!isspace(line[i]))
-		{
-		start = i;
-		break;
+			if (line[i] != ' ')
+			{
+				start = i;
+				break;
 			}
 		}
 
-		for (i = strlen(line) - 1; i >= 0; i--)
+		for (i = end; i >= 0; i--)
 		{
-		if (!isspace(line[i]))
-		{
-		end = i;
-		break;
+			if (line[i] != ' ')
+			{
+				end = i;
+				break;
 			}
 		}
 
@@ -74,8 +74,11 @@ int main(void)
 
 		if (pid == 0)
 		{
-			char *argv[] = { clean_line, NULL };
-
+			
+			char *argv[2];
+			argv[0] = clean_line;
+			argv[1] = NULL;
+			
 			if (execve(clean_line, argv, environ) == -1)
 			{
 				fprintf(stderr, "%s: No such file or directory\n", line);
