@@ -8,7 +8,7 @@
 #include <fcntl.h>
 
 /**
- * borrar_espacio - Removes leading and trailing whitespace from input string.
+ * borrar_espacio - sirve para borrar los espacios y las tabulaciones al inicio y final de cada comando 
  * @input: The original string entered by the user.
  *
  * Return: A pointer to the trimmed version of the string.
@@ -94,7 +94,7 @@ int main(void)
 		if (access(line, X_OK) != 0)
 		{
 			fprintf(stderr, "%s: command not found\n", line);
-			break;
+			continue;
 		}
 
 		ejecutar_comando(line);
