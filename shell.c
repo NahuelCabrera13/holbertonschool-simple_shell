@@ -7,13 +7,6 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
-/**
- * borrar_espacio - sirve para borrar los espacios y las tabulaciones al inicio y final de cada comando 
- * @input: The original string entered by the user.
- *
- * Return: A pointer to the trimmed version of the string.
- */
-
 char *borrar_espacio(char *input)
 {
 	char *start = input;
@@ -22,60 +15,60 @@ char *borrar_espacio(char *input)
 	while (*start == ' ' || *start == '\t')
 		start++;
 	if (*start == '\0')
-		return (start);
+		return start;
 	end = start + strlen(start) - 1;
 	while (end > start && (*end == ' ' || *end == '\t'))
 		end--;
 	*(end + 1) = '\0';
-	return (start);
+	return start;
 }
 
-/**
- * ejecutar_comando - Forks and executes a command using execve.
- * @line: The full path of the command to be executed.
- *
- * Return: Nothing. If the fork fails, it does nothing.
- */
+int megan_tokens_colo(char *line, char **argv)
+{
+	int argc = 0;
+	char *tok;
 
-void ejecutar_comando(char *line)
+	tok = strtok(line, " \t");
+	while (tok && argc < 99)
+	{
+		argv[argc++] = tok;
+		tok = strtok(NULL, " \t");
+	}
+	argv[argc] = NULL;
+	return (argc);
+}
+
+void ejecutar_comando(char **argv)
 {
 	pid_t pid;
 	int status;
-	char *argv[2];
 
 	pid = fork();
 	if (pid < 0)
 		return;
 	if (pid == 0)
 	{
-		argv[0] = line;
-		argv[1] = NULL;
-		execve(line, argv, environ);
-		fprintf(stderr, "%s: command not found\n", line);
+		execve(argv[0], argv, environ);
+		fprintf(stderr, "%s: command not found\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
-	else
-		waitpid(pid, &status, 0);
+	waitpid(pid, &status, 0);
 }
-
-/**
- * main - Entry point for the custom shell.
- *
- * Return: Always returns 0 on successful execution.
- */
 
 int main(void)
 {
 	char *line = NULL;
 	size_t len = 0;
 	ssize_t nread;
+	char *argv[100];
+	int argc;
 
 	while (1)
 	{
 		printf("#peladosupremo$ ");
 
 		nread = getline(&line, &len, stdin);
-		if (nread == -1)
+		if (nread == -1 && (strcmp(argv[0], "exit") == 0))
 		{
 			putchar('\n');
 			break;
@@ -83,21 +76,24 @@ int main(void)
 
 		if (line[nread - 1] == '\n')
 			line[nread - 1] = '\0';
-		if (strcmp(line, "exit") == 0)
-		{
-			printf("odalep ed olep omoc etsiuf eT\n");
-			break;
-		}
+
 		line = borrar_espacio(line);
+
 		if (line[0] == '\0')
 			continue;
-		if (access(line, X_OK) != 0)
+
+		argc = megan_tokens_colo(line, argv);
+
+		if (argc == 0)
+			continue;
+
+		if (access(argv[0], X_OK) != 0)
 		{
-			fprintf(stderr, "%s: command not found\n", line);
+			fprintf(stderr, "%s: command not found\n", argv[0]);
 			continue;
 		}
 
-		ejecutar_comando(line);
+		ejecutar_comando(argv);
 	}
 
 	free(line);
