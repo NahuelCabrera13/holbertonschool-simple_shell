@@ -7,22 +7,35 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
-extern char **environ;
+/**
+ * borrar_espacio - Removes leading and trailing whitespace from input string.
+ * @input: The original string entered by the user.
+ *
+ * Return: A pointer to the trimmed version of the string.
+ */
 
 char *borrar_espacio(char *input)
 {
 	char *start = input;
 	char *end;
+
 	while (*start == ' ' || *start == '\t')
 		start++;
 	if (*start == '\0')
-		return start;
+		return (start);
 	end = start + strlen(start) - 1;
 	while (end > start && (*end == ' ' || *end == '\t'))
 		end--;
 	*(end + 1) = '\0';
-	return start;
+	return (start);
 }
+
+/**
+ * ejecutar_comando - Forks and executes a command using execve.
+ * @line: The full path of the command to be executed.
+ *
+ * Return: Nothing. If the fork fails, it does nothing.
+ */
 
 void ejecutar_comando(char *line)
 {
@@ -45,6 +58,12 @@ void ejecutar_comando(char *line)
 		waitpid(pid, &status, 0);
 }
 
+/**
+ * main - Entry point for the custom shell.
+ *
+ * Return: Always returns 0 on successful execution.
+ */
+
 int main(void)
 {
 	char *line = NULL;
@@ -54,7 +73,7 @@ int main(void)
 	while (1)
 	{
 		printf("#peladosupremo$ ");
-		
+
 		nread = getline(&line, &len, stdin);
 		if (nread == -1)
 		{
@@ -72,11 +91,11 @@ int main(void)
 		line = borrar_espacio(line);
 		if (line[0] == '\0')
 			continue;
-		 if (access(line, X_OK) != 0)
-                {
-                        fprintf(stderr, "%s: command not found\n", line);
-                        break;
-                }
+		if (access(line, X_OK) != 0)
+		{
+			fprintf(stderr, "%s: command not found\n", line);
+			break;
+		}
 
 		ejecutar_comando(line);
 	}
@@ -84,4 +103,3 @@ int main(void)
 	free(line);
 	return (0);
 }
-
