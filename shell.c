@@ -87,6 +87,12 @@ int main(void)
 		if (argc == 0)
 			continue;
 
+		if (strcmp(argv[0], "exit") == 0)
+		{
+			printf("odalep ed olep omoc etsiuf eT\n");
+			break;
+		}
+
 		if (access(argv[0], X_OK) != 0)
 		{
 			fprintf(stderr, "%s: command not found\n", argv[0]);
