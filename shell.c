@@ -65,15 +65,15 @@ int main(void)
 
 	while (1)
 	{
+		if (isatty(STDIN_FILENO))
 		printf("#peladosupremo$ ");
 
 		nread = getline(&line, &len, stdin);
-		if (nread == -1 && (strcmp(argv[0], "exit") == 0))
+		if (nread == -1)
 		{
 			putchar('\n');
 			break;
 		}
-
 		if (line[nread - 1] == '\n')
 			line[nread - 1] = '\0';
 
