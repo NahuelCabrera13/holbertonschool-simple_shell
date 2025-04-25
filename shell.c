@@ -57,7 +57,7 @@ void ejecutar_comando(char **argv)
 
 int main(void)
 {
-	char *line = NULL;
+	char *line = NULL, *clean_line = NULL;
 	size_t len = 0;
 	ssize_t nread;
 	char *argv[100];
@@ -78,12 +78,12 @@ int main(void)
 		if (line[nread - 1] == '\n')
 			line[nread - 1] = '\0';
 
-		line = borrar_espacio(line);
+		clean_line = borrar_espacio(line);
 
-		if (line[0] == '\0')
+		if (clean_line[0] == '\0')
 			continue;
 
-		argc = megan_tokens_colo(line, argv);
+		argc = megan_tokens_colo(clean_line, argv);
 
 		if (argc == 0)
 			continue;
