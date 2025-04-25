@@ -71,8 +71,9 @@ int main(void)
 		nread = getline(&line, &len, stdin);
 		if (nread == -1)
 		{
+			if (isatty(STDIN_FILENO))
 			putchar('\n');
-			break;
+		break;
 		}
 		if (line[nread - 1] == '\n')
 			line[nread - 1] = '\0';
@@ -89,8 +90,9 @@ int main(void)
 
 		if (strcmp(argv[0], "exit") == 0)
 		{
+			if (isatty(STDIN_FILENO))
 			printf("odalep ed olep omoc etsiuf eT\n");
-			break;
+		break;
 		}
 
 		if (access(argv[0], X_OK) != 0)
