@@ -7,6 +7,8 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
+int last_status = 0;
+
 char *borrar_espacio(char *input)
 {
 	char *start = input;
@@ -53,6 +55,8 @@ void ejecutar_comando(char **argv)
 		exit(EXIT_FAILURE);
 	}
 	waitpid(pid, &status, 0);
+	if (WIFEXITED(status))
+		last_status = WEXITSTATUS(status);
 }
 
 int main(void)
@@ -105,5 +109,5 @@ int main(void)
 	}
 
 	free(line);
-	return (0);
+	return (last_status);
 }
