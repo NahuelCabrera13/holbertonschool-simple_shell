@@ -1,58 +1,80 @@
-# hsh - peladosupremo Shell
+# hsh - Simple Shell
 
-Este repositorio contiene la implementación de una shell simple llamada `hsh`, escrita en lenguaje C. Esta shell puede ejecutarse en modo interactivo o no interactivo, interpretar comandos del usuario y ejecutarlos utilizando llamadas al sistema como `fork()`, `execve()` y `access()`.
-
----
-
-## 📄 Descripción
-
-`hsh` es una shell personalizada que emula el comportamiento básico de una shell de Unix.  
-Puede ejecutar comandos con rutas completas como `/bin/ls`, manejar errores básicos, cortar espacios innecesarios y retornar correctamente el código de salida del último comando ejecutado.
+Este proyecto consiste en la creación de una shell mínima escrita en lenguaje C. La shell ejecuta comandos ingresados por el usuario en modo interactivo o no interactivo, utilizando llamadas al sistema como `fork()`, `execve()`, `access()` y `waitpid()`.
 
 ---
 
-## 🚀 Funcionalidades
+## Descripción breve del proyecto
 
-- Leer entradas con `getline()`
-- Eliminar espacios y tabulaciones innecesarias
-- Separar comandos y argumentos con `strtok()`
-- Verificar permisos de ejecución con `access()`
-- Crear procesos con `fork()` y ejecutar comandos con `execve()`
-- Retornar el código de salida del último comando (`$?`)
-- Modo interactivo y no interactivo
-- Comando interno `exit` para salir de la shell
+La shell implementada simula el comportamiento básico de una shell de Unix. Permite ejecutar comandos introducidos por el usuario utilizando rutas absolutas. Gestiona errores de forma simple, recorta espacios innecesarios en las entradas, y retorna el código de salida del último comando ejecutado.
 
 ---
 
-## 📂 Archivos del proyecto
+## ¿Cómo empezar a usar la shell? (paso a paso)
+
+1. Clonar el repositorio del proyecto:
+
+```bash
+git clone https://github.com/NahuelCabrera13/holbertonschool-simple_shell.git
+```
+
+2. Ingresar al directorio del proyecto:
+
+```bash
+cd holbertonschool-simple_shell
+```
+
+3. Compilar el código fuente:
+
+```bash
+gcc -Wall -Wextra -Werror -pedantic shell.c -o hsh
+```
+
+4. Ejecutar la shell:
+
+```bash
+./hsh
+```
+
+---
+
+## Funcionalidades
+
+- Lectura de comandos con `getline()`
+- Eliminación de espacios iniciales y finales
+- Separación de comandos en argumentos con `strtok()`
+- Verificación de permisos de ejecución con `access()`
+- Creación de procesos con `fork()` y ejecución con `execve()`
+- Captura del código de salida del último proceso ejecutado
+- Soporte para modo interactivo y no interactivo
+- Comando `exit` para finalizar la shell
+
+---
+
+## Archivos del proyecto
 
 | Archivo        | Descripción                                                        |
 |----------------|--------------------------------------------------------------------|
-| `shell.c`      | Contiene el código fuente principal de la shell                   |
-| `main.h`       | Encabezado con prototipos y librerías necesarias                  |
-| `README.md`    | Documentación del proyecto                                        |
+| `shell.c`      | Contiene la implementación principal de la shell                   |
+| `main.h`       | Archivo de cabecera con prototipos de funciones y librerías        |
+| `README.md`    | Documentación del proyecto                                         |
 
 ---
 
-## 🧠 Prototipos de funciones
+## Prototipos de funciones
 
 | Función                         | Descripción                                                                 |
 |---------------------------------|-----------------------------------------------------------------------------|
 | `char *borrar_espacio(char *);` | Elimina espacios y tabulaciones al inicio y final de una cadena            |
 | `int megan_tokens_colo(char *, char **);` | Tokeniza una línea en un arreglo de argumentos para `execve()`    |
 | `void ejecutar_comando(char **);` | Ejecuta un comando con `execve()` después de hacer `fork()`               |
-| `int main(void);`               | Función principal: gestiona lectura, parseo, validación y ejecución        |
+| `int main(void);`               | Función principal. Administra el ciclo de lectura, validación y ejecución |
 
 ---
 
-## 🔧 Valor de retorno
+## Ejemplos de uso
 
-La shell retorna el código de salida del último comando ejecutado.  
-Por ejemplo, si `/bin/ls /noexiste` retorna 2, la shell termina con código 2.
-
----
-
-## 💻 Ejemplo de uso interactivo
+### Modo interactivo
 
 ```bash
 $ ./hsh
@@ -62,5 +84,68 @@ README.md
 hsh
 main.h
 shell.c
+#peladosupremo$ /bin/echo Hola mundo
+Hola mundo
 #peladosupremo$ exit
 odalep ed olep omoc etsiuf eT
+```
+
+### Modo no interactivo
+
+```bash
+echo "/bin/ls" | ./hsh
+```
+
+```bash
+cat comandos.txt | ./hsh
+```
+
+Contenido de `comandos.txt`:
+
+```
+/bin/echo Esto es una prueba
+/bin/ls
+exit
+```
+
+---
+
+## Llamadas al sistema utilizadas
+
+| Llamada / Función | Descripción breve                                               |
+|-------------------|------------------------------------------------------------------|
+| `getline()`       | Lee la entrada del usuario o del pipe                           |
+| `strtok()`        | Separa la entrada en tokens (comandos y argumentos)             |
+| `fork()`          | Crea un nuevo proceso hijo                                      |
+| `execve()`        | Ejecuta el comando solicitado desde el hijo                     |
+| `waitpid()`       | Espera a que el hijo termine para continuar                     |
+| `access()`        | Verifica si el archivo existe y si tiene permisos de ejecución  |
+| `exit()`          | Finaliza el programa                                            |
+| `isatty()`        | Detecta si la entrada es interactiva o redirigida               |
+
+---
+
+## Comportamiento general de la shell
+
+1. Lee el input del usuario (o desde entrada estándar)
+2. Elimina los espacios innecesarios
+3. Tokeniza el input para separar el comando y sus argumentos
+4. Verifica si el archivo existe y tiene permisos de ejecución
+5. Crea un proceso hijo con `fork()`
+6. El hijo ejecuta el comando con `execve()`
+7. El padre espera al hijo con `waitpid()`
+8. Se muestra el prompt nuevamente si está en modo interactivo
+
+---
+
+## Código de salida
+
+La shell retorna el mismo código de salida del último comando ejecutado, accesible desde `$?`.  
+Por ejemplo, si `/bin/ls /directorio_inexistente` falla con código `2`, la shell terminará con código `2`.
+
+---
+
+## Contribuyentes
+
+- **Nahuel Cabrera**
+- **Erick Gaiero**
