@@ -1,87 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>peladosupremo Shell</title>
-</head>
-<body>
+# hsh - peladosupremo Shell
 
-	<h1>🖥️ peladosupremo Shell</h1>
+Este repositorio contiene la implementación de una shell simple llamada `hsh`, escrita en lenguaje C. Esta shell puede ejecutarse en modo interactivo o no interactivo, interpretar comandos del usuario y ejecutarlos utilizando llamadas al sistema como `fork()`, `execve()` y `access()`.
 
-	<p>
-	Este proyecto es una implementación de una shell mínima hecha en C, inspirada en el funcionamiento de la shell de Unix.
-	</p>
+---
 
-	<h2>📄 Descripción</h2>
-	<p>
-	La shell <code>./hsh</code> lee comandos del usuario (modo interactivo) o desde una entrada estándar (modo no interactivo),
-	los interpreta, los tokeniza, y los ejecuta usando <code>execve()</code>.
-	También gestiona errores, recortes de espacios, y retorna correctamente el código de salida del último comando ejecutado.
-	</p>
+## 📄 Descripción
 
-	<h2>🧠 Funcionalidades</h2>
-	<ul>
-		<li>Lectura de comandos con <code>getline()</code></li>
-		<li>Eliminación de espacios con <code>borrar_espacio()</code></li>
-		<li>Tokenización con <code>strtok()</code></li>
-		<li>Chequeo de permisos con <code>access()</code></li>
-		<li>Ejecución con <code>fork()</code> y <code>execve()</code></li>
-		<li>Captura de código de salida con <code>WEXITSTATUS()</code></li>
-		<li>Soporte para comando <code>exit</code></li>
-		<li>Compatible con entrada no interactiva</li>
-	</ul>
+`hsh` es una shell personalizada que emula el comportamiento básico de una shell de Unix.  
+Puede ejecutar comandos con rutas completas como `/bin/ls`, manejar errores básicos, cortar espacios innecesarios y retornar correctamente el código de salida del último comando ejecutado.
 
-	<h2>📦 Archivos del Proyecto</h2>
-	<table border="1" cellpadding="5">
-		<tr><th>Archivo</th><th>Descripción</th></tr>
-		<tr><td><code>shell.c</code></td><td>Contiene la implementación principal de la shell</td></tr>
-		<tr><td><code>main.h</code></td><td>Prototipos de funciones y librerías requeridas</td></tr>
-	</table>
+---
 
-	<h2>🔧 Funciones implementadas</h2>
-	<table border="1" cellpadding="5">
-		<tr><th>Función</th><th>Descripción</th></tr>
-		<tr><td><code>char *borrar_espacio(char *input);</code></td><td>Recorta espacios y tabulaciones al inicio y fin de una cadena</td></tr>
-		<tr><td><code>int megan_tokens_colo(char *line, char **argv);</code></td><td>Tokeniza una línea en palabras separadas</td></tr>
-		<tr><td><code>void ejecutar_comando(char **argv);</code></td><td>Ejecuta un comando usando <code>fork()</code> y <code>execve()</code></td></tr>
-		<tr><td><code>int main(void);</code></td><td>Función principal. Administra el ciclo de lectura, validación y ejecución</td></tr>
-	</table>
+## 🚀 Funcionalidades
 
-	<h2>🧪 Ejemplo de uso</h2>
-	<pre><code>
+- Leer entradas con `getline()`
+- Eliminar espacios y tabulaciones innecesarias
+- Separar comandos y argumentos con `strtok()`
+- Verificar permisos de ejecución con `access()`
+- Crear procesos con `fork()` y ejecutar comandos con `execve()`
+- Retornar el código de salida del último comando (`$?`)
+- Modo interactivo y no interactivo
+- Comando interno `exit` para salir de la shell
+
+---
+
+## 📂 Archivos del proyecto
+
+| Archivo        | Descripción                                                        |
+|----------------|--------------------------------------------------------------------|
+| `shell.c`      | Contiene el código fuente principal de la shell                   |
+| `main.h`       | Encabezado con prototipos y librerías necesarias                  |
+| `README.md`    | Documentación del proyecto                                        |
+
+---
+
+## 🧠 Prototipos de funciones
+
+| Función                         | Descripción                                                                 |
+|---------------------------------|-----------------------------------------------------------------------------|
+| `char *borrar_espacio(char *);` | Elimina espacios y tabulaciones al inicio y final de una cadena            |
+| `int megan_tokens_colo(char *, char **);` | Tokeniza una línea en un arreglo de argumentos para `execve()`    |
+| `void ejecutar_comando(char **);` | Ejecuta un comando con `execve()` después de hacer `fork()`               |
+| `int main(void);`               | Función principal: gestiona lectura, parseo, validación y ejecución        |
+
+---
+
+## 🔧 Valor de retorno
+
+La shell retorna el código de salida del último comando ejecutado.  
+Por ejemplo, si `/bin/ls /noexiste` retorna 2, la shell termina con código 2.
+
+---
+
+## 💻 Ejemplo de uso interactivo
+
+```bash
 $ ./hsh
 #peladosupremo$ /bin/ls
 AUTHORS
-README.html
+README.md
 hsh
 main.h
 shell.c
-</code></pre>
-
-	<h2>📌 Modo no interactivo</h2>
-	<pre><code>
-echo "/bin/ls" | ./hsh
-</code></pre>
-
-	<h2>🔚 Salida con 'exit'</h2>
-	<pre><code>
 #peladosupremo$ exit
 odalep ed olep omoc etsiuf eT
-</code></pre>
-
-	<h2>📥 Requisitos del checker cubiertos</h2>
-	<ul>
-		<li>Soporte a modo no interactivo</li>
-		<li>Uso correcto de getline, fork, execve, access</li>
-		<li>Devolución correcta de códigos de salida</li>
-		<li>Sin memory leaks (valgrind clean)</li>
-	</ul>
-
-	<h2>👨‍💻 Contribuyentes</h2>
-	<ul>
-		<li><strong>Nahuel Bica</strong></li>
-		<li><strong>Erick Gaiero</strong></li>
-	</ul>
-
-</body>
-</html>
