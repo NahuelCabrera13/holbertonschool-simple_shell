@@ -6,24 +6,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-extern char **environ;
-
-char *borrar_espacio(char *input)
-{
-	char *start = input;
-	char *end;
-
-	while (*start == ' ' || *start == '\t')
-		start++;
-	if (*start == '\0')
-		return start;
-	end = start + strlen(start) - 1;
-	while (end > start && (*end == ' ' || *end == '\t'))
-		end--;
-	*(end + 1) = '\0';
-	return start;
-}
-
 int megan_tokens_colo(char *line, char **argv)
 {
 	int argc = 0;
