@@ -6,25 +6,41 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-int megan_tokens_colo(char *line, char **argv)
+/**
+ * handle_input - Reads and processes the input line
+ * @line: pointer to the input buffer
+ * @len: pointer to the size of buffer
+ * @argv: arguments array to fill
+ * Return: number of tokens or -1 if error
+ */
+int handle_input(char **line, size_t *len, char **argv)
 {
+	ssize_t nread;
+	char *clean_line;
 	int argc = 0;
-	char *tok;
 
-	tok = strtok(line, " \t");
-	while (tok && argc < 99)
-	{
-		argv[argc++] = tok;
-		tok = strtok(NULL, " \t");
-	}
-	argv[argc] = NULL;
-	return argc;
+	nread = leer_linea(line, len);
+	if (nread == -1)
+		return (-1);
+
+	if ((*line)[nread - 1] == '\n')
+		(*line)[nread - 1] = '\0';
+
+	clean_line = borrar_espacio(*line);
+	if (clean_line[0] == '\0')
+		return (0);
+
+	argc = tokenizar_entrada(clean_line, argv);
+	return (argc);
 }
 
+/**
+ * process_command - Handles command execution
+ * @argv: arguments array
+ */
 void process_command(char **argv)
 {
 	char *cmd_path;
-	pid_t pid;
 
 	if (strcmp(argv[0], "exit") == 0)
 		exit(0);
@@ -32,61 +48,47 @@ void process_command(char **argv)
 	if (strchr(argv[0], '/'))
 	{
 		if (access(argv[0], X_OK) != 0)
-			exit(127);
+		{
+			fprintf(stderr, "./hsh: 1: %s: not found\n", argv[0]);
+			return;
+		}
 		cmd_path = argv[0];
 	}
 	else
 	{
 		cmd_path = buscar_en_path(argv[0]);
 		if (!cmd_path)
-			exit(127);
+		{
+			fprintf(stderr, "./hsh: 1: %s: not found\n", argv[0]);
+			return;
+		}
 	}
-
-	pid = fork();
-	if (pid < 0)
-		exit(1);
-	if (pid == 0)
-		execve(cmd_path, argv, environ);
-	else
-	{
-		int status;
-		waitpid(pid, &status, 0);
-		if (WIFEXITED(status))
-			exit(WEXITSTATUS(status));
-		exit(1);
-	}
+	ejecutar_comando(cmd_path, argv);
+	if (cmd_path != argv[0])
+		free(cmd_path);
 }
 
+/**
+ * simple_shell - Main shell loop
+ * Return: Exit status
+ */
 int simple_shell(void)
 {
 	char *line = NULL;
 	size_t len = 0;
-	ssize_t nread;
 	char *argv[100];
 	int argc;
 
 	while (1)
 	{
-		if (isatty(STDIN_FILENO))
-		{
-			printf("#peladosupremo$ ");
-			fflush(stdout);
-		}
+		argc = handle_input(&line, &len, argv);
 
-		nread = getline(&line, &len, stdin);
-		if (nread == -1)
+		if (argc == -1)
 		{
-			putchar('\n');
+			if (isatty(STDIN_FILENO))
+				write(STDOUT_FILENO, "\n", 1);
 			break;
 		}
-		if (line[nread - 1] == '\n')
-			line[nread - 1] = '\0';
-
-		line = borrar_espacio(line);
-		if (line[0] == '\0')
-			continue;
-
-		argc = megan_tokens_colo(line, argv);
 		if (argc == 0)
 			continue;
 
@@ -94,5 +96,5 @@ int simple_shell(void)
 	}
 
 	free(line);
-	return 0;
+	return (0);
 }
