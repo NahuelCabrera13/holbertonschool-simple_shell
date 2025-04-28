@@ -10,7 +10,8 @@ extern char **environ;
 
 char *borrar_espacio(char *input)
 {
-	char *start = input, *end;
+	char *start = input;
+	char *end;
 
 	while (*start == ' ' || *start == '\t')
 		start++;
@@ -41,6 +42,7 @@ int megan_tokens_colo(char *line, char **argv)
 void process_command(char **argv)
 {
 	char *cmd_path;
+	pid_t pid;
 
 	if (strcmp(argv[0], "exit") == 0)
 		exit(0);
@@ -58,7 +60,7 @@ void process_command(char **argv)
 			exit(127);
 	}
 
-	pid_t pid = fork();
+	pid = fork();
 	if (pid < 0)
 		exit(1);
 	if (pid == 0)
@@ -67,7 +69,6 @@ void process_command(char **argv)
 	{
 		int status;
 		waitpid(pid, &status, 0);
-		/* si el hijo terminó con status de error, la shell hereda ese status */
 		if (WIFEXITED(status))
 			exit(WEXITSTATUS(status));
 		exit(1);
@@ -78,9 +79,9 @@ int simple_shell(void)
 {
 	char *line = NULL;
 	size_t len = 0;
+	ssize_t nread;
 	char *argv[100];
 	int argc;
-	ssize_t nread;
 
 	while (1)
 	{
