@@ -49,7 +49,7 @@ void process_command(char **argv)
 	{
 		if (access(argv[0], X_OK) != 0)
 		{
-			fprintf(stderr, "%s: command not found\n", argv[0]);
+			fprintf(stderr, "./hsh: 1: %s: not found\n", argv[0]);
 			return;
 		}
 		cmd_path = argv[0];
@@ -59,7 +59,7 @@ void process_command(char **argv)
 		cmd_path = buscar_en_path(argv[0]);
 		if (!cmd_path)
 		{
-			fprintf(stderr, "%s: command not found\n", argv[0]);
+			fprintf(stderr, "./hsh: 1: %s: not found\n", argv[0]);
 			return;
 		}
 	}

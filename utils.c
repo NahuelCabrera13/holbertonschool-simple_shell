@@ -77,7 +77,7 @@ char *buscar_en_path(char *cmd)
 	size_t len;
 
 	path = encontrar_path();
-	if (!path)
+	if (!path|| path[0] == '\0')
 		return (NULL);
 
 	path_copy = strdup(path);
