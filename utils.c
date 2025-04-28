@@ -48,16 +48,35 @@ int tokenizar_entrada(char *line, char **argv)
 }
 
 /**
- * buscar_en_path - Busca un comando en el PATH
- * @cmd: Comando a buscar
- * Return: Ruta completa si existe, NULL si no
+ * encontrar_path - Encuentra la variable PATH manualmente
+ * Return: valor de PATH o NULL
+ */
+char *encontrar_path(void)
+{
+	int i = 0;
+	char *path_prefix = "PATH=";
+	size_t prefix_len = 5;
+
+	while (environ[i])
+	{
+		if (strncmp(environ[i], path_prefix, prefix_len) == 0)
+			return (environ[i] + prefix_len);
+		i++;
+	}
+	return (NULL);
+}
+
+/**
+ * buscar_en_path - Busca el comando en los directorios de PATH
+ * @cmd: comando a buscar
+ * Return: ruta completa si existe, NULL si no
  */
 char *buscar_en_path(char *cmd)
 {
 	char *path, *path_copy, *dir, *full_path;
 	size_t len;
 
-	path = getenv("PATH");
+	path = encontrar_path();
 	if (!path)
 		return (NULL);
 
