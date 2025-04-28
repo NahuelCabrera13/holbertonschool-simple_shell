@@ -5,109 +5,96 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <fcntl.h>
 
-int last_status = 0;
-
-char *borrar_espacio(char *input)
+/**
+ * handle_input - Reads and processes the input line
+ * @line: pointer to the input buffer
+ * @len: pointer to the size of buffer
+ * @argv: arguments array to fill
+ * Return: number of tokens or -1 if error
+ */
+int handle_input(char **line, size_t *len, char **argv)
 {
-	char *start = input;
-	char *end;
-
-	while (*start == ' ' || *start == '\t')
-		start++;
-	if (*start == '\0')
-		return start;
-	end = start + strlen(start) - 1;
-	while (end > start && (*end == ' ' || *end == '\t'))
-		end--;
-	*(end + 1) = '\0';
-	return start;
-}
-
-int megan_tokens_colo(char *line, char **argv)
-{
+	ssize_t nread;
+	char *clean_line;
 	int argc = 0;
-	char *tok;
 
-	tok = strtok(line, " \t");
-	while (tok && argc < 99)
-	{
-		argv[argc++] = tok;
-		tok = strtok(NULL, " \t");
-	}
-	argv[argc] = NULL;
+	nread = leer_linea(line, len);
+	if (nread == -1)
+		return (-1);
+
+	if ((*line)[nread - 1] == '\n')
+		(*line)[nread - 1] = '\0';
+
+	clean_line = borrar_espacio(*line);
+	if (clean_line[0] == '\0')
+		return (0);
+
+	argc = tokenizar_entrada(clean_line, argv);
 	return (argc);
 }
 
-void ejecutar_comando(char **argv)
+/**
+ * process_command - Handles command execution
+ * @argv: arguments array
+ */
+void process_command(char **argv)
 {
-	pid_t pid;
-	int status;
+	char *cmd_path;
 
-	pid = fork();
-	if (pid < 0)
-		return;
-	if (pid == 0)
+	if (strcmp(argv[0], "exit") == 0)
+		exit(0);
+
+	if (strchr(argv[0], '/'))
 	{
-		execve(argv[0], argv, environ);
-		fprintf(stderr, "%s: command not found\n", argv[0]);
-		exit(EXIT_FAILURE);
+		if (access(argv[0], X_OK) != 0)
+		{
+			fprintf(stderr, "%s: command not found\n", argv[0]);
+			return;
+		}
+		cmd_path = argv[0];
 	}
-	waitpid(pid, &status, 0);
-	if (WIFEXITED(status))
-		last_status = WEXITSTATUS(status);
+	else
+	{
+		cmd_path = buscar_en_path(argv[0]);
+		if (!cmd_path)
+		{
+			fprintf(stderr, "%s: command not found\n", argv[0]);
+			return;
+		}
+	}
+	ejecutar_comando(cmd_path, argv);
+	if (cmd_path != argv[0])
+		free(cmd_path);
 }
 
-int main(void)
+/**
+ * simple_shell - Main shell loop
+ * Return: Exit status
+ */
+int simple_shell(void)
 {
-	char *line = NULL, *clean_line = NULL;
+	char *line = NULL;
 	size_t len = 0;
-	ssize_t nread;
 	char *argv[100];
 	int argc;
 
 	while (1)
 	{
-		if (isatty(STDIN_FILENO))
-		printf("#peladosupremo$ ");
+		argc = handle_input(&line, &len, argv);
 
-		nread = getline(&line, &len, stdin);
-		if (nread == -1)
+		if (argc == -1)
 		{
 			if (isatty(STDIN_FILENO))
-			putchar('\n');
-		break;
+				write(STDOUT_FILENO, "\n", 1);
+			break;
 		}
-		if (line[nread - 1] == '\n')
-			line[nread - 1] = '\0';
-
-		clean_line = borrar_espacio(line);
-
-		if (clean_line[0] == '\0')
-			continue;
-
-		argc = megan_tokens_colo(clean_line, argv);
-
 		if (argc == 0)
 			continue;
 
-		if (strcmp(argv[0], "exit") == 0)
-		{
-			if (isatty(STDIN_FILENO))
-			printf("odalep ed olep omoc etsiuf eT\n");
-		break;
-		}
-
-		if (access(argv[0], X_OK) != 0)
-		{
-			fprintf(stderr, "%s: command not found\n", argv[0]);
-			continue;
-		}
-
-		ejecutar_comando(argv);
+		process_command(argv);
 	}
 
 	free(line);
-	return (last_status);
+	return (0);
 }
